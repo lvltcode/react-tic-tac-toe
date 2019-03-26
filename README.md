@@ -1,4 +1,4 @@
-# CoderSchool FTW - Movie Database
+# CoderSchool FTW - Tic-Tac-Toe React Game
 
 Created with love by: `lvltcode`
   

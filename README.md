@@ -1,3 +1,64 @@
+# CoderSchool FTW - Movie Database
+
+Created with love by: `lvltcode`
+  
+View online at: https://react-tic-tac-toe-lvltcode.netlify.com/
+  
+TIC TAC TOE game from React Facebook
+
+## Video Walkthrough
+
+Here's a walkthrough of implemented user stories.
+
+To create a GIF, use [LiceCap](http://www.cockos.com/licecap/), [RecordIt](http://www.recordit.co), or [Loom](http://www.useloom.com), and link the image here in the markdown.
+
+```
+<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+```
+
+## User Stories
+
+The following **required** functionalities are completed (this is a sample):
+
+* [x] Milestone 1: Set up our Workspace & Draw Our Board
+* [x] Milestone 2: Pass your first Data
+* [x] Milestone 3: Let's Fire Up some Action
+* [x] Milestone 4: Storing Value with State
+* [x] Milestone 5: Time to get Serious
+* [x] Milestone 6: Wait, a new Syntax has appeared
+* [x] Milestone 7: Implement X/O turn and Figure Out the Winner
+* [x] Figure out the winner
+
+
+The following **optional** features are implemented:
+
+* [x] Implement Time Travel Feature 
+
+
+## Time Spent and Lessons Learned
+
+Time spent: 5 hours spent in total.
+
+Describe any challenges encountered while building the app.
+
+## License
+
+    Copyright [yyyy] [name of copyright owner]
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+#Description about react
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
@@ -66,4 +127,3 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
-# react-tic-tac-toe

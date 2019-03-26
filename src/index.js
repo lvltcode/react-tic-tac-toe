@@ -1,11 +1,31 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Button } from "reactstrap";
+
+const styleNode = {
+  fontSize: "80px",
+  color: "#107532"
+};
+
+let x = <i className="fas fa-skull" style={styleNode} />;
+let y = <i className="fas fa-poop" style={styleNode} />;
+
+const styleSquare = {
+  width: 150,
+  height: 150
+};
 
 const Square = ({ onClick, value }) => (
-  <button className="square" onClick={() => onClick()}>
+  <Button
+    className="square m-1 p-2"
+    color="danger"
+    style={styleSquare}
+    onClick={() => onClick()}
+  >
     {value}
-  </button>
+  </Button>
 );
 class Board extends React.Component {
   renderSquare(i) {
@@ -19,7 +39,7 @@ class Board extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="m-5 p-2">
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -60,7 +80,8 @@ class Game extends React.Component {
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
-    squares[i] = this.state.xIsNext ? "X" : "O";
+
+    squares[i] = this.state.xIsNext ? x : y;
     this.setState({
       history: history.concat([
         {
@@ -87,21 +108,24 @@ class Game extends React.Component {
       const desc = move ? "Go to move #" + move : "Go to game start";
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          <Button onClick={() => this.jumpTo(move)}>{desc}</Button>
         </li>
       );
     });
 
     let status;
+    // let sk = <i className="fas fa-skull" style={styleNode} />;
+    // let sh = <i className="fas fa-poop" style={styleNode} />;
+    // console.log(sh);
     if (winner) {
-      status = "Winner: " + winner;
+      status = "Winner: " + (this.state.xIsNext ? "Sh*t" : "Skull");
     } else {
-      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+      status = "Next player: " + (this.state.xIsNext ? "Skull" : "Sh*t");
     }
 
     return (
-      <div className="game">
-        <div className="game-board">
+      <div className="game d-flex justify-content-center align-self-center m-3">
+        <div className="game-board ">
           <Board squares={current.squares} onClick={i => this.handleClick(i)} />
         </div>
         <div className="game-info">
@@ -118,21 +142,47 @@ class Game extends React.Component {
 ReactDOM.render(<Game />, document.getElementById("root"));
 
 function calculateWinner(squares) {
-  const lines = [
+  const winnerLines = [
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8],
+    [0, 4, 8],
+    [2, 4, 6],
     [0, 3, 6],
     [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
+    [2, 5, 8]
   ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
+  for (let i = 0; i < winnerLines.length; i++) {
+    const [a, b, c] = winnerLines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a];
     }
+    return null;
   }
-  return null;
 }
+
+// function calculateWinner(squares) {
+//   const lines = [
+//     [0, 1, 2],
+//     [3, 4, 5],
+//     [6, 7, 8],
+//     [0, 3, 6],
+//     [1, 4, 7],
+//     [2, 5, 8],
+//     [0, 4, 8],
+//     [2, 4, 6]
+//   ];
+//   for (let i = 0; i < lines.length; i++) {
+//     const [a, b, c] = lines[i];
+//     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+//       return squares[a];
+//     }
+//   }
+//   return null;
+// }
+// if (squares[0] === squares [1] && squares[1] === squares[2]) {
+//     return square[0]
+// }
+// else if (squares[3] === squares [4] && squares[4] === squares[5]) {
+//     return square[3]
+// }

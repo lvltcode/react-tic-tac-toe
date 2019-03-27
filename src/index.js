@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "reactstrap";
+import FacebookLogin from "react-facebook-login";
 
 const styleNode = {
   fontSize: "80px",
@@ -99,6 +100,16 @@ class Game extends React.Component {
       xIsNext: step % 2 === 0
     });
   }
+
+  async responseFacebook(resp) {
+    const name = resp.name;
+    const imgUrl = resp.picture.data.url;
+    this.setState({
+      name: name,
+      userImg: imgUrl
+    });
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
@@ -112,11 +123,7 @@ class Game extends React.Component {
         </li>
       );
     });
-
     let status;
-    // let sk = <i className="fas fa-skull" style={styleNode} />;
-    // let sh = <i className="fas fa-poop" style={styleNode} />;
-    // console.log(sh);
     if (winner) {
       status = "Winner: " + (this.state.xIsNext ? "Sh*t" : "Skull");
     } else {
@@ -124,13 +131,26 @@ class Game extends React.Component {
     }
 
     return (
-      <div className="game d-flex justify-content-center align-self-center m-3">
-        <div className="game-board ">
-          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
+      <div>
+        <div className="game d-flex justify-content-center align-self-center m-3">
+          <div className="game-board ">
+            <Board
+              squares={current.squares}
+              onClick={i => this.handleClick(i)}
+            />
+          </div>
+          <div className="game-info">
+            <div>{status}</div>
+            <ol>{moves}</ol>
+          </div>
         </div>
-        <div className="game-info">
-          <div>{status}</div>
-          <ol>{moves}</ol>
+        <div className="App d-flex justify-content-center ml-2 pl-2">
+          <FacebookLogin
+            appId="1191646981013537"
+            autoLoad={true}
+            fields="name,email,picture"
+            callback={resp => this.responseFacebook(resp)}
+          />
         </div>
       </div>
     );
@@ -157,8 +177,8 @@ function calculateWinner(squares) {
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a];
     }
-    return null;
   }
+  return null;
 }
 
 // function calculateWinner(squares) {

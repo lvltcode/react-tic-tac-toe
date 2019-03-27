@@ -71,27 +71,36 @@ class Game extends React.Component {
         }
       ],
       stepNumber: 0,
-      xIsNext: true
+      xIsNext: true,
+      name: "",
+      userImg: "",
+      highScoreBoard: []
     };
   }
   handleClick(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
+    const currentTime = !this.state.stepNumber ? Date.now() : 0;
+
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
 
     squares[i] = this.state.xIsNext ? x : y;
-    this.setState({
-      history: history.concat([
-        {
-          squares: squares
-        }
-      ]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext
-    });
+    this.setState(
+      {
+        history: history.concat([
+          {
+            squares: squares
+          }
+        ]),
+        stepNumber: history.length,
+        xIsNext: !this.state.xIsNext,
+        timeStart: !this.state.stepNumber ? currentTime : this.state.timeStart
+      },
+      () => this.getHighScore()
+    );
   }
 
   jumpTo(step) {
@@ -110,13 +119,63 @@ class Game extends React.Component {
     });
   }
 
+  async handleGetHighScoreFromSever() {
+    const url = `http://ftw-highscores.herokuapp.com/tictactoe-dev`;
+    const response = await fetch(url, {
+      method: "GET"
+    });
+    const report = await response.json();
+    this.setState({
+      highScoreBoard: report.items
+    });
+  }
+
+  getHighScore() {
+    const timeStart = this.state.timeStart;
+    const endTime = Date.now();
+    const timeLapse = Math.floor((endTime - timeStart) / 1000);
+
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = this.calculateWinner(current.squares);
+    this.setState({
+      score: winner ? timeLapse : 0
+    });
+  }
+
+  componentDidMount() {
+    this.handleGetHighScoreFromSever();
+  }
+
+  async handlePostHighScore() {
+    let data = new URLSearchParams();
+    const name = this.state.name;
+    const highScore = this.state.score;
+    data.append("player", name);
+    data.append("score", highScore);
+    const url = `http://ftw-highscores.herokuapp.com/tictactoe-dev`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: data.toString(),
+      json: true
+    });
+    console.log("results: ", response);
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
+    const stepNumber = this.state.stepNumber;
+    const score = this.state.score;
+    const highScoreBoard = this.state.highScoreBoard;
+
     const moves = history.map((step, move) => {
-      const desc = move ? "Go to move #" + move : "Go to game start";
+      const desc = move ? "Go to move #" + move : "Go to game-start";
       return (
         <li key={move}>
           <Button onClick={() => this.jumpTo(move)}>{desc}</Button>
@@ -124,33 +183,90 @@ class Game extends React.Component {
       );
     });
     let status;
-    if (winner) {
-      status = "Winner: " + (this.state.xIsNext ? "Sh*t" : "Skull");
-    } else {
+
+    if (winner && stepNumber !== 9) {
+      status =
+        "Winner: " +
+        (this.state.xIsNext ? "Sh*t" : "Skull") +
+        ", Score: " +
+        score +
+        "s";
+    } else if (!winner && stepNumber !== 9) {
       status = "Next player: " + (this.state.xIsNext ? "Skull" : "Sh*t");
+    } else if (stepNumber === 9) {
+      status = "Muahahahaha";
     }
+    const scoreBoard = highScoreBoard.map(x => {
+      return (
+        <Table bordered>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>id</th>
+              <th>Player</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>{items.id}</td>
+              <td>Otto</td>
+              <td>@mdo</td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td>{items.name}</td>
+              <td>Thornton</td>
+              <td>@fat</td>
+            </tr>
+            <tr>
+              <th scope="row">3</th>
+              <td>{items.score}</td>
+              <td>the Bird</td>
+              <td>@twitter</td>
+            </tr>
+          </tbody>
+        </Table>
+      );
+    });
 
     return (
       <div>
-        <div className="game d-flex justify-content-center align-self-center m-3">
-          <div className="game-board ">
+        <div className="game d-flex justify-content-center">
+          <div className="game-board">
             <Board
               squares={current.squares}
               onClick={i => this.handleClick(i)}
             />
           </div>
-          <div className="game-info">
+          <div className="col-1" />
+          <div className="game-info justify-content-end my-5 pt-5 px-4 bg-warning border">
             <div>{status}</div>
             <ol>{moves}</ol>
           </div>
         </div>
-        <div className="App d-flex justify-content-center ml-2 pl-2">
+        <div className="App d-flex justify-content-end">
           <FacebookLogin
             appId="1191646981013537"
             autoLoad={true}
             fields="name,email,picture"
             callback={resp => this.responseFacebook(resp)}
+            textButton={this.state.name ? " Logged in" : " Login with facebook"}
+            isDisabled={this.state.name}
           />
+          <div className="col-2" />
+          <div className="">
+            <Button
+              color="info"
+              className="mr-3"
+              onClick={() => this.handlePostHighScore()}
+            >
+              Send your high-scores
+            </Button>
+            <Table>{scoreBoard}</Table>
+          </div>
+          <div className="col-2" />
         </div>
       </div>
     );
@@ -180,29 +296,3 @@ function calculateWinner(squares) {
   }
   return null;
 }
-
-// function calculateWinner(squares) {
-//   const lines = [
-//     [0, 1, 2],
-//     [3, 4, 5],
-//     [6, 7, 8],
-//     [0, 3, 6],
-//     [1, 4, 7],
-//     [2, 5, 8],
-//     [0, 4, 8],
-//     [2, 4, 6]
-//   ];
-//   for (let i = 0; i < lines.length; i++) {
-//     const [a, b, c] = lines[i];
-//     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-//       return squares[a];
-//     }
-//   }
-//   return null;
-// }
-// if (squares[0] === squares [1] && squares[1] === squares[2]) {
-//     return square[0]
-// }
-// else if (squares[3] === squares [4] && squares[4] === squares[5]) {
-//     return square[3]
-// }

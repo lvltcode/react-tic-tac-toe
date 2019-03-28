@@ -74,14 +74,15 @@ class Game extends React.Component {
       xIsNext: true,
       name: "",
       userImg: "",
-      highScoreBoard: []
+      highScoreBoard: [],
+      timeStart: Date.now(),
+      timeLapse: null
     };
   }
   handleClick(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    const currentTime = !this.state.stepNumber ? Date.now() : 0;
 
     if (calculateWinner(squares) || squares[i]) {
       return;
@@ -95,10 +96,8 @@ class Game extends React.Component {
         }
       ]),
       stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
-      timeStart: !this.state.stepNumber ? currentTime : this.state.timeStart
+      xIsNext: !this.state.xIsNext
     });
-    this.getHighScore();
   }
 
   jumpTo(step) {
@@ -117,7 +116,7 @@ class Game extends React.Component {
     });
   }
 
-  async handleGetHighScoreFromSever() {
+  async getHighScore() {
     const url = `https://ftw-highscores.herokuapp.com/tictactoe-dev`;
     const response = await fetch(url, {
       method: "GET"
@@ -128,27 +127,27 @@ class Game extends React.Component {
     });
   }
 
-  getHighScore() {
-    const timeStart = this.state.timeStart;
-    const endTime = Date.now();
-    const timeLapse = Math.floor((endTime - timeStart) / 1000);
-
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
-    this.setState({
-      score: winner ? timeLapse : 0
-    });
+  componentDidMount() {
+    this.getHighScore();
   }
 
-  componentDidMount() {
-    this.handleGetHighScoreFromSever();
+  async handleDelete() {
+    const url = `https://ftw-highscores.herokuapp.com/tictactoe-dev/${
+      this.state.highScoreBoard.id
+    }`;
+    const response = await fetch(url, {
+      method: "DELETE"
+    });
+    const report = await response.json();
+    this.setState({
+      highScoreBoard: " "
+    });
   }
 
   async handlePostHighScore() {
     let data = new URLSearchParams();
     const name = this.state.name;
-    const highScore = this.state.score;
+    const highScore = this.state.timeLapse;
     data.append("player", name);
     data.append("score", highScore);
     const url = `https://ftw-highscores.herokuapp.com/tictactoe-dev`;
@@ -169,7 +168,9 @@ class Game extends React.Component {
     const winner = calculateWinner(current.squares);
 
     const stepNumber = this.state.stepNumber;
-    const score = this.state.score;
+    this.state.timeLapse = Math.floor(
+      (Date.now() - this.state.timeStart) / 1000
+    );
     const highScoreBoard = this.state.highScoreBoard;
 
     const moves = history.map((step, move) => {
@@ -187,18 +188,15 @@ class Game extends React.Component {
         "Winner: " +
         (this.state.xIsNext ? "Sh*t" : "Skull") +
         ", Score: " +
-        score +
-        "s";
+        this.state.timeLapse;
     } else if (!winner && stepNumber !== 9) {
       status = "Next player: " + (this.state.xIsNext ? "Skull" : "Sh*t");
     } else if (stepNumber === 9) {
       status = "Muahahahaha";
     }
     const scoreBoard = highScoreBoard.map(items => {
-      console.log("items", items);
       return (
         <tr>
-          <td>{items._id}</td>
           <td>{items.player}</td>
           <td>{items.score}</td>
         </tr>
@@ -238,10 +236,21 @@ class Game extends React.Component {
             >
               Send your high-scores
             </Button>
+            <Button
+              color="success"
+              onClick={() =>
+                this.handleDelete(
+                  this.state.highScore.map(item => {
+                    return item._id;
+                  })
+                )
+              }
+            >
+              Delete
+            </Button>
             <Table>
               <thead>
                 <tr>
-                  <th>id</th>
                   <th>Player</th>
                   <th>Score</th>
                 </tr>

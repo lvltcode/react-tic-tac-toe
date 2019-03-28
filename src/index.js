@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Button } from "reactstrap";
+import { Button, Table } from "reactstrap";
 import FacebookLogin from "react-facebook-login";
 
 const styleNode = {
@@ -88,19 +88,17 @@ class Game extends React.Component {
     }
 
     squares[i] = this.state.xIsNext ? x : y;
-    this.setState(
-      {
-        history: history.concat([
-          {
-            squares: squares
-          }
-        ]),
-        stepNumber: history.length,
-        xIsNext: !this.state.xIsNext,
-        timeStart: !this.state.stepNumber ? currentTime : this.state.timeStart
-      },
-      () => this.getHighScore()
-    );
+    this.setState({
+      history: history.concat([
+        {
+          squares: squares
+        }
+      ]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext,
+      timeStart: !this.state.stepNumber ? currentTime : this.state.timeStart
+    });
+    this.getHighScore();
   }
 
   jumpTo(step) {
@@ -120,7 +118,7 @@ class Game extends React.Component {
   }
 
   async handleGetHighScoreFromSever() {
-    const url = `http://ftw-highscores.herokuapp.com/tictactoe-dev`;
+    const url = `https://ftw-highscores.herokuapp.com/tictactoe-dev`;
     const response = await fetch(url, {
       method: "GET"
     });
@@ -137,7 +135,7 @@ class Game extends React.Component {
 
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = this.calculateWinner(current.squares);
+    const winner = calculateWinner(current.squares);
     this.setState({
       score: winner ? timeLapse : 0
     });
@@ -153,7 +151,7 @@ class Game extends React.Component {
     const highScore = this.state.score;
     data.append("player", name);
     data.append("score", highScore);
-    const url = `http://ftw-highscores.herokuapp.com/tictactoe-dev`;
+    const url = `https://ftw-highscores.herokuapp.com/tictactoe-dev`;
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -196,38 +194,14 @@ class Game extends React.Component {
     } else if (stepNumber === 9) {
       status = "Muahahahaha";
     }
-    const scoreBoard = highScoreBoard.map(x => {
+    const scoreBoard = highScoreBoard.map(items => {
+      console.log("items", items);
       return (
-        <Table bordered>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>id</th>
-              <th>Player</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>{items.id}</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>{items.name}</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td>{items.score}</td>
-              <td>the Bird</td>
-              <td>@twitter</td>
-            </tr>
-          </tbody>
-        </Table>
+        <tr>
+          <td>{items._id}</td>
+          <td>{items.player}</td>
+          <td>{items.score}</td>
+        </tr>
       );
     });
 
@@ -264,10 +238,27 @@ class Game extends React.Component {
             >
               Send your high-scores
             </Button>
-            <Table>{scoreBoard}</Table>
+            <Table>
+              <thead>
+                <tr>
+                  <th>id</th>
+                  <th>Player</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>{scoreBoard}</tbody>
+            </Table>
           </div>
           <div className="col-2" />
         </div>
+      </div>
+    );
+    return (
+      <div className="user-info">
+        <label>Email:</label>
+        <span type="text" id="email">
+          test@test.com
+        </span>
       </div>
     );
   }
